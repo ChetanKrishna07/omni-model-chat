@@ -1,2 +1,8 @@
 .env
 /code
+/.cache
+/venv
+/autogen_ext
+/__pycache__
+.DS_Store
+archive*
