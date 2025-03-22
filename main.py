@@ -3,20 +3,30 @@ import dotenv
 
 dotenv.load_dotenv()
 
-config_list_agent = autogen.config_list_from_dotenv(
+config_list_admin = autogen.config_list_from_dotenv(
     dotenv_file_path=".env",
     model_api_key_map={"gpt-3.5-turbo": "OPENAI_API_KEY"},
 )
 
-config_list_agent = autogen.config_list_from_dotenv(
+config_list_artist = autogen.config_list_from_dotenv(
     dotenv_file_path=".env",
-    model_api_key_map={"gpt-3.5-turbo": "OPENAI_API_KEY"},
+    model_api_key_map={"gpt-4o-mini": "OPENAI_API_KEY"},
+)
+
+config_list_artist = autogen.config_list_from_dotenv(
+    dotenv_file_path=".env",
+    model_api_key_map={"gpt-o3-mini": "OPENAI_API_KEY"},
+)
+
+config_list_artist = autogen.config_list_from_dotenv(
+    dotenv_file_path=".env",
+    model_api_key_map={"gpt-o3-mini": "OPENAI_API_KEY"},
 )
 
 llm_config = {
     "cache_seed": 44,
     "temperature": 0,
-    "config_list": config_list_agent,
+    "config_list": config_list_admin,
     "timeout": 120,
 }
 
@@ -52,7 +62,7 @@ coder = autogen.AssistantAgent(
 group_chat = autogen.GroupChat(
     agents = [user_proxy, artist, mathematician, coder],
     messages = [],
-    max_round = 10,
+    max_round = 2,
 )
 
 manager = autogen.GroupChatManager(groupchat=group_chat, llm_config=llm_config)
