@@ -13,26 +13,6 @@ dotenv.load_dotenv()
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
-# Note: This example uses mock tools instead of real APIs for demonstration purposes
-def search_web_tool(query: str) -> str:
-    if "2006-2007" in query:
-        return """Here are the total points scored by Miami Heat players in the 2006-2007 season:
-        Udonis Haslem: 844 points
-        Dwayne Wade: 1397 points
-        James Posey: 550 points
-        ...
-        """
-    elif "2007-2008" in query:
-        return "The number of total rebounds for Dwayne Wade in the Miami Heat season 2007-2008 is 214."
-    elif "2008-2009" in query:
-        return "The number of total rebounds for Dwayne Wade in the Miami Heat season 2008-2009 is 398."
-    return "No data found."
-
-
-def percentage_change_tool(start: float, end: float) -> float:
-    return ((end - start) / start) * 100
-
-
 model_client = OpenAIChatCompletionClient(
     model="gpt-4o",
     api_key=openai_api_key
@@ -49,36 +29,26 @@ o3_mini = OpenAIChatCompletionClient(
     )
 
 
-
-planning_agent = AssistantAgent(
-    "PlanningAgent",
-    description="An agent for planning tasks, this agent should be the first to engage when given a new task.",
+pre_processing_agent = AssistantAgent(
+    "PreProcessingAgent",
+    description="Removes extraneous information from a given math word problem.",
     model_client=four_o,
     system_message="""
-    You are a planning agent.
-    Your job is to break down complex tasks into smaller, manageable subtasks.
-    Your team members are:
-        MathAgent: Expert in doing only math problems
-        CreativeAgent: Expert only in creative tasks
-        CodingAgent: Expert only in writing code
-        GenericAgent: Expert in general tasks, it can also perform research for the data needed to execute the task.
-
-    You only plan and delegate tasks - you do not execute them yourself.
-
-    When assigning tasks, use this format:
-    1. <agent> : <task>
-
-    After all tasks are complete, summarize the findings and end with "TERMINATE".
-    """,
-)
-
-generic_agent = AssistantAgent(
-    "GenericAgent",
-    description="An agent for general tasks. Or general text generation.",
-    model_client=four_o,
-    system_message="""
-    You are a generic agent.
-    You can perform general tasks that do not require specialized knowledge. You also have the ability to perform research to gather data needed to execute a task.
+    You are a pre-processing agent.
+    Your job is to remove any extraneous information from the math word problem that is unnecessary for solving the problem.
+    If a given piece of information is irrelevant to the problem, you should remove it.
+    If a given piece of information has a slighest relevance to the problem, you should keep it.
+    Only remove information that is irrelevant to what the problem is asking.
+    
+    Explain why you removed the information in the math word problem.
+    
+    Your response should be in the following format:
+    <Thinking>
+    [Every step of your thought process to remove the extraneous information]
+    </Thinking> 
+    <FilteredProblem>
+    [Math word problem with extraneous information removed]
+    </FilteredProblem>
     """
 )
 
@@ -88,67 +58,72 @@ math_agent = AssistantAgent(
     model_client=o3_mini,
     system_message="""
     You are a math agent.
-    Your job is to only solve mathematical problems and provide explanations for the solutions. Present every step in the solution.
-    """,
+    
+    Your job is to only solve mathematical problems and provide explanations for the solutions.
+    
+    If the information in the math word problem given is not sufficient to solve the problem, respond exactly with <Solution>UNSOLVABLE</Solution> nothing more, nothing less.
+    If the problem if unsolvable, respond exactly with <Solution>UNSOLVABLE</Solution> nothing more, nothing less.
+    
+    If the problem is solvable, present in the following format:
+    
+    <Solution>
+    [Detailed Step-by-Step Solution]
+        <Answer>
+            [Single Numerical Value]
+        </Answer>
+    </Solution>
+    """
 )
+    
 
-creative_agent = AssistantAgent(
-    "CreativeAgent",
-    description="An agent for creative tasks.",
+planning_agent = AssistantAgent(
+    "PlanningAgent",
+    description="An agent for planning tasks, this agent should be the first to engage when given a new task.",
     model_client=four_o,
     system_message="""
-    You are a creative agent.
-    Your job is to perform creative tasks that do not require analysis or reasoning.
-    """
-)
+    You are a planning agent.
+    Your job to orchastrate the team of agents to solve the math word problem.
+    
+    Your team members are:
+        PreProcessingAgent: Expert in removing extraneous information from math word problems.
+        MathAgent: Expert in solving mathematical problems.
+    
+    You fist give the math word problem to the PreProcessingAgent to remove any extraneous information.
+    Then you pass whatever is in the <FilteredProblem> from the PreProcessingAgent's response to the MathAgent to solve the math word problem.
+    You finally display the solution to the math word problem exactly as it is given by the MathAgent.
+    
+    When assigning tasks, use this format:
+    1. <agent> : <task>
 
-coding_agent = AssistantAgent(
-    "CodingAgent",
-    description="An agent for writing code.",
-    model_client=o3_mini,
-    system_message="""
-    You are a coding agent.
-    Your job is to write code in various programming languages. You are an expert in coding. You provide proper comments and documentation for your code.
-    You first give the code enclosed in triple backticks, then the output followed by the explation in plain text and the documentation if required.
-    Format:
-    ```
-    [code]
-    ```
-    Output: 
-    ```
-    [output]
-    ```
-    Explanation:
-    [explanation]
-    Documentation:
-    [documentation]
-    """
-)
-
-web_search_agent = AssistantAgent(
-    "WebSearchAgent",
-    description="An agent for searching information on the web.",
-    tools=[search_web_tool],
-    model_client=model_client,
-    system_message="""
-    You are a web search agent.
-    Your only tool is search_tool - use it to find information.
-    You make only one search call at a time.
-    Once you have the results, you never do calculations based on them.
+    After all tasks are complete, summarize the findings and end with "TERMINATE".
     """,
 )
 
-data_analyst_agent = AssistantAgent(
-    "DataAnalystAgent",
-    description="An agent for performing calculations.",
-    model_client=model_client,
-    tools=[percentage_change_tool],
-    system_message="""
-    You are a data analyst.
-    Given the tasks you have been assigned, you should analyze the data and provide results using the tools provided.
-    If you have not seen the data, ask for it.
-    """,
-)
+
+# web_search_agent = AssistantAgent(
+#     "WebSearchAgent",
+#     description="An agent for searching information on the web.",
+#     tools=[search_web_tool],
+#     model_client=model_client,
+#     system_message="""
+#     You are a web search agent.
+#     Your only tool is search_tool - use it to find information.
+#     You make only one search call at a time.
+#     Once you have the results, you never do calculations based on them.
+#     """,
+# )
+
+# data_analyst_agent = AssistantAgent(
+#     "DataAnalystAgent",
+#     description="An agent for performing calculations.",
+#     model_client=model_client,
+#     tools=[percentage_change_tool],
+#     system_message="""
+#     You are a data analyst.
+#     Given the tasks you have been assigned, you should analyze the data and provide results using the tools provided.
+#     If you have not seen the data, ask for it.
+#     """,
+# )
 
 text_mention_termination = TextMentionTermination("TERMINATE")
 max_messages_termination = MaxMessageTermination(max_messages=25)
@@ -167,14 +142,27 @@ Only select one agent.
 """
 
 team = SelectorGroupChat(
-    [planning_agent, math_agent, creative_agent, coding_agent],
+    [planning_agent, math_agent, pre_processing_agent],
     model_client=model_client,
     termination_condition=termination,
     selector_prompt=selector_prompt,
-    allow_repeated_speaker=True,  # Allow an agent to speak multiple turns in a row.
+    allow_repeated_speaker=False,  # Allow an agent to speak multiple turns in a row.
 )
 
-task = "Who was the Miami Heat player with the highest points in the 2006-2007 season, and what was the percentage change in his total rebounds between the 2007-2008 and 2008-2009 seasons?"
+task = """
+
+Problem:
+
+Samantha, an avid birdwatcher, wakes up at 6:45 AM every Saturday to prepare for her weekend birdwatching trip. She always packs a thermos of coffee (450 ml), three granola bars, a notebook with 120 pages (only 15 are used), and a set of binoculars with 10x magnification. On a particular Saturday, she drives 35 miles to the Silver Creek Nature Reserve, where she plans to spend exactly 4 hours observing birds.
+
+There are 12 types of birds commonly seen at the reserve, but she's especially interested in observing the red-tailed hawk. Last week, she saw 4 of them in 3 hours, but only 2 of them were mature adults. The reserve is open from 8:00 AM to 6:00 PM, and parking costs $3 per hour.
+
+This Saturday, Samantha arrived at 8:15 AM and parked her car. She spent 45 minutes walking to the northern overlook and 30 minutes setting up her observation spot. While birdwatching, she recorded that the average number of red-tailed hawks spotted per hour increased by 0.5 compared to last week. Afterward, she stopped by the reserve's gift shop, where she spent $18.50 on souvenirs and bought a book on migratory birds discounted by 25% off its original $24 price.
+
+Question:
+How many red-tailed hawks did Samantha observe this Saturday?
+
+"""
 
 # Use asyncio.run(...) if you are running this in a script.
 asyncio.run(Console(team.run_stream(task=task)))
