@@ -2,7 +2,8 @@ import re
 
 # Define pricing rates (dollars per 1M tokens)
 pricing = {
-    "o3-mini-2025-01-31": {"prompt": 1.10, "completion": 4.40 },
+    "o3-mini-2025-01-31": {"prompt": 1.10, "completion": 4.40},
+    # "gpt-4o-mini": {"prompt": 0.150, "completion": 0.600},
     "gpt-4o-mini": {"prompt": 0.150, "completion": 0.600}
 }
 
