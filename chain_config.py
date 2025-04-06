@@ -41,37 +41,13 @@ preprocessing_prompt = PromptTemplate(
 preprocessing_chain = preprocessing_prompt | pre_processing_model
 
 
-math_prompt_template_pg = """
+math_prompt_template = """
 You are a math agent.
 Your job is to solve mathematical problems and provide explanations for the solutions.
 
 If the information in the math word problem given is not sufficient to solve the problem, only respond with exactly 'UNSOLVABLE' in the <Answer> tag.
 Attempt to solve the problem using the information provided in the math word problem, and if you cannot find a solution, respond with UNSOLVABLE in the <Answer> tag.
 Always simplify your answer to the simplest form possible.
-
-If the problem is solvable, present the solution in the following format:
-
-<Solution>
-    <Steps>
-        [Detailed Step-by-Step Solution]
-    </Steps>
-    <Answer>
-        [Single Numerical Value] / UNSOLVABLE
-    </Answer>
-</Solution>
-
-Math Question: {filtered_problem}
-"""
-
-
-math_prompt_template = """
-You are a math agent.
-Your job is to only solve mathematical problems and provide explanations for the solutions.
-
-If the information in the math word problem given is not sufficient to solve the problem, respond exactly with UNSOLVABLE in the <Answer> tag nothing more, nothing less.
-If the problem is unsolvable, respond exactly with UNSOLVABLE in the <Answer> tag nothing more, nothing less.
-Attempt to solve the problem using the information provided in the math word problem, and if you cannot find a solution, resopond with UNSOLVABLE in the <Answer> tag.
-Always simplify your answer to the simplest form possible, and relevant to the problem.
 
 If the problem is solvable, present the solution in the following format:
 
