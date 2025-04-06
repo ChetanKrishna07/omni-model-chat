@@ -2,6 +2,47 @@ import os
 import json
 import re
 import pandas as pd
+import xml.etree.ElementTree as ET
+
+def get_tasks_asdiv():
+    xml_data = open('ASDiv.xml', 'r').read()
+    root = ET.fromstring(xml_data)
+
+    data = []
+
+    # Loop over each 'Problem' element
+    for problem in root.findall('.//Problem'):
+        problem_data = {
+            'ID': problem.get('ID'),
+            'Grade': problem.get('Grade'),
+            'Source': problem.get('Source'),
+            'Body': problem.find('Body').text if problem.find('Body') is not None else '',
+            'Question': problem.find('Question').text if problem.find('Question') is not None else '',
+            'Solution-Type': problem.find('Solution-Type').text if problem.find('Solution-Type') is not None else '',
+            'Answer': problem.find('Answer').text if problem.find('Answer') is not None else '',
+            'Formula': problem.find('Formula').text if problem.find('Formula') is not None else ''
+        }
+        data.append(problem_data)
+
+    # Create a dataFrame
+    df = pd.DataFrame(data)
+    df['FullQuestion'] = df['Body'] + ' ' + df['Question']
+    df['Answer'] = df['Answer'].str.replace(r'\s*\(.*\)', '', regex=True)
+    df = df.drop(['Source','Grade','Solution-Type','ID','Formula'], axis=1)
+
+
+    tasks = []
+
+    for row in df.iterrows():
+        data = row[1]
+        tasks.append({
+            "Question": data['FullQuestion'],
+            "Answer": data['Answer']
+        })
+
+
+    print(tasks)
+
 
 def get_tasks_gsm_8k(hint=None):
     """
