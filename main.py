@@ -1,6 +1,6 @@
 import dotenv
 dotenv.load_dotenv()
-from data_process import get_tasks_gsm_8k
+from data_process import get_tasks_gsm_8k, get_tasks_asdiv, filter_tasks
 from completion import run_task_omni, run_task_solo
 
 def run_analysis(tasks, verbose=False):
@@ -20,6 +20,7 @@ def run_analysis(tasks, verbose=False):
             print("--" * 50)
             print("Running Omni Task:\n")
         correct, omni_price, omni_sol = run_task_omni(task, verbose=verbose)
+        print(f"Omni Task Cost: ${omni_price}")
         omni_cost += omni_price
         
         if verbose:
@@ -32,6 +33,7 @@ def run_analysis(tasks, verbose=False):
             print("Running Solo Task:\n")
             
         correct, solo_price, solo_sol = run_task_solo(task, verbose=verbose)
+        print(f"Solo Task Cost: ${solo_price}")
         solo_cost += solo_price
         
         if verbose:
@@ -86,7 +88,9 @@ def main():
     # }]
     
     tasks = get_tasks_gsm_8k()
-    sub_set = tasks[:1]
+    # tasks = get_tasks_asdiv()
+    long_tasks = filter_tasks(tasks, 54, 500)
+    sub_set = long_tasks[:5]
     
     print("Running Analysis on Tasks...\n")
     
@@ -96,16 +100,16 @@ def main():
     
     print(f"\nSummary of Results:")
     print(f"Omni Task Correct: {omni_results['omni_correct']}/{len(sub_set)}")
-    print(f"Average Omni Task Cost: ${omni_results['omni_cost'] / len(sub_set)} / 1M tokens")
+    print(f"Average Omni Task Cost: ${omni_results['omni_cost'] / len(sub_set)} / 1 problem")
     
-    print(f"Omni Task Correct Cost: ${omni_results['omni_correct_cost'] / omni_results['omni_correct']} / 1M tokens")
+    print(f"Omni Task Correct Cost: ${omni_results['omni_correct_cost'] / omni_results['omni_correct']} / 1 problem")
     
     print("--" * 50)
     
     print(f"Solo Task Correct: {omni_results['solo_correct']}/{len(sub_set)}")
-    print(f"Average Solo Task Cost: ${omni_results['solo_cost'] / len(sub_set)} / 1M tokens")
+    print(f"Average Solo Task Cost: ${omni_results['solo_cost'] / len(sub_set)} / 1 problem")
     
-    print(f"Solo Task Correct Cost: ${omni_results['solo_correct_cost'] / omni_results['solo_correct']} / 1M tokens")
+    print(f"Solo Task Correct Cost: ${omni_results['solo_correct_cost'] / omni_results['solo_correct']} / 1 problem")
 
 if __name__ == "__main__":
     main()

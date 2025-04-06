@@ -95,8 +95,8 @@ def run_task_omni(task: dict[str, str], verbose=False) -> bool:
         print("Completion tokens:", cb_math.completion_tokens)
         print("Total tokens:", cb_math.total_tokens)
     cost_math = calculate_cost(cb_math.prompt_tokens, cb_math.completion_tokens, "o3-mini-2025-01-31")
-    # total_cost = cost_pre + cost_math
-    total_cost = cost_math
+    total_cost = cost_pre + cost_math
+    # total_cost = cost_math
     
     if verbose:
         print(f"Total Cost for Omni Task: ${total_cost}e-6")

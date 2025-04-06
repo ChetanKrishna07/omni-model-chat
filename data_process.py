@@ -5,9 +5,9 @@ import pandas as pd
 import xml.etree.ElementTree as ET
 
 def get_tasks_asdiv():
-    xml_data = open('ASDiv.xml', 'r').read()
+    xml_data = open('./datasets/ASDiv.xml', 'r').read()
     root = ET.fromstring(xml_data)
-
+    
     data = []
 
     # Loop over each 'Problem' element
@@ -95,4 +95,20 @@ def get_tasks_gsm_8k(hint=None):
     
     return tasks
 
-get_tasks_gsm_8k()
+def filter_tasks(tasks, min_len, max_len):
+    """
+    Filter tasks based on the specified length of the question
+    
+    Args:
+        tasks (list): A list of tasks to filter.
+        length (int): The maximum length of the task.
+        
+    Returns:
+        list: A list of filtered tasks.
+    """
+    filtered_tasks = []
+    for task in tasks:
+        task_length = len(task["Question"].split())
+        if min_len <= task_length <= max_len:
+            filtered_tasks.append(task)
+    return filtered_tasks

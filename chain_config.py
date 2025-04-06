@@ -7,8 +7,8 @@ dotenv.load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 pre_processing_model = ChatOpenAI(model="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0)
-# math_model = ChatOpenAI(model="o3-mini-2025-01-31", openai_api_key=openai_api_key, temperature=None)
-math_model = ChatOpenAI(model="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0) 
+math_model = ChatOpenAI(model="o3-mini-2025-01-31", openai_api_key=openai_api_key, temperature=None)
+# math_model = ChatOpenAI(model="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0) 
 
 
 preprocessing_prompt_template = """
@@ -37,7 +37,7 @@ preprocessing_prompt = PromptTemplate(
     template=preprocessing_prompt_template
 )
 
-# The preprocessing chain uses the GPT-4 model
+# The preprocessing chain uses the GPT-4o model
 preprocessing_chain = preprocessing_prompt | pre_processing_model
 
 
