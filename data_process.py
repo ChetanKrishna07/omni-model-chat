@@ -41,7 +41,7 @@ def get_tasks_asdiv():
         })
 
 
-    print(tasks)
+    return tasks
 
 
 def get_tasks_gsm_8k(hint=None):
