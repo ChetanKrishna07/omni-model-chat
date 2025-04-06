@@ -1,5 +1,5 @@
 import pandas as pd
-from data_process import get_tasks_asdiv, filter_tasks
+from data_process import get_tasks_asdiv
 from completion import run_task_solo, run_task_omni
 
 def get_price(row):
