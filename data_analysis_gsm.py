@@ -19,8 +19,16 @@ print("Getting the number of words in each question...")
 gsm_8k_df['no_of_words'] = gsm_8k_df['Question'].apply(lambda x: len(x.split()))
 
 print("Calculating costs and correctness...")
-gsm_8k_df['solo_cost'], gsm_8k_df['omni_cost'], gsm_8k_df['solo_correct'], gsm_8k_df['omni_correct'] = zip(*gsm_8k_df.apply(get_price, axis=1))
+for index, row in gsm_8k_df.iterrows():
+    solo_cost, omni_cost, solo_correct, omni_correct = get_price(row)
+    gsm_8k_df.at[index, 'solo_cost'] = solo_cost
+    gsm_8k_df.at[index, 'omni_cost'] = omni_cost
+    gsm_8k_df.at[index, 'solo_correct'] = solo_correct
+    gsm_8k_df.at[index, 'omni_correct'] = omni_correct
+    if index % 100 == 0:
+        gsm_8k_df.to_csv(f'Data Analysis/gsm_8k_analysis_{index}.csv', index=False)
+        print(f"Processed {index} rows...")
 
 print("Saving results to CSV...")
-gsm_8k_df.to_csv('gsm_8k_analysis.csv', index=False)  # Save the dataframe to a CSV file
+gsm_8k_df.to_csv('Data Analysis/gsm_8k_analysis.csv', index=False)  # Save the dataframe to a CSV file
 

@@ -19,8 +19,16 @@ print("Getting the number of words in each question...")
 asdiv_df['no_of_words'] = asdiv_df['Question'].apply(lambda x: len(x.split()))
 
 print("Calculating costs and correctness...")
-asdiv_df['solo_cost'], asdiv_df['omni_cost'], asdiv_df['solo_correct'], asdiv_df['omni_correct'] = zip(*asdiv_df.apply(get_price, axis=1))
+for index, row in asdiv_df.iterrows():
+    solo_cost, omni_cost, solo_correct, omni_correct = get_price(row)
+    asdiv_df.at[index, 'solo_cost'] = solo_cost
+    asdiv_df.at[index, 'omni_cost'] = omni_cost
+    asdiv_df.at[index, 'solo_correct'] = solo_correct
+    asdiv_df.at[index, 'omni_correct'] = omni_correct
+    if index % 100 == 0:
+        asdiv_df.to_csv(f'Data Analysis/asdiv_analysis_{index}.csv', index=False)
+        print(f"Processed {index} rows...")
 
 print("Saving results to CSV...")
-asdiv_df.to_csv('asdiv_analysis.csv', index=False)  # Save the dataframe to a CSV file
+asdiv_df.to_csv('Data Analysis/asdiv_analysis.csv', index=False)  # Save the dataframe to a CSV file
 
