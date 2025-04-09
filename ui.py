@@ -12,7 +12,8 @@ def greet(Chat, model):
         
     correct, cost, solution_dict = result
     answer = solution_dict["Answer"]
-    return answer, f"${cost}"
+    print(solution_dict)
+    return answer, f"${cost}", solution_dict["Question"]
 
 demo = gr.Interface(
     fn=greet, 
@@ -20,6 +21,6 @@ demo = gr.Interface(
         "text",
         gr.Radio(["omni_model", "solo_model"]),    
     ],
-    outputs=["text", "text"])
+    outputs=["text", "text", "text"])
 
 demo.launch()

@@ -32,6 +32,7 @@ def run_task_solo(task: dict[str, str], verbose=False) -> bool:
     
     math_text = math_out.content
     solution_dict = parse_math_solution(math_text)
+    solution_dict["Question"] = task["Question"]
     
     if verbose:
         print("\nSolution:")
@@ -103,6 +104,7 @@ def run_task_omni(task: dict[str, str], verbose=False) -> bool:
     
     math_text = math_out.content
     solution_dict = parse_math_solution(math_text)
+    solution_dict["Question"] = preprocessed_dict["FilteredProblem"]
     
     if verbose:
         print("\nSolution:")
